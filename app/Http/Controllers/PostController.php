@@ -82,31 +82,40 @@ class PostController extends Controller
 
     public function list(ListRequest $request){
     
+        
+        $search_columns  = ['title', 'tags'];
+
         $limit = ($request->limit) ?  $request->limit : 50;
         $sort_column = ( $request->sort_column) ?  $request->sort_column : 'id';
         $sort_order = ( $request->sort_order) ?  $request->sort_order : 'desc';
-                 
+        
+        $status = 0;
+          
         $data = new Post;
 
-        $data = Post::with(['users','posts'])->whereUserId(auth()->user()->id);
-
-         /* Searching for the value of the request. */
-         if(isset($request->search)) {
+        /* Searching for the value of the request. */
+        if(isset($request->search)) {
 
             $key = $request->search;
 
             /* Searching for the key in the columns. */
-            $data = $data->whereHas('posts', function ($q) use ($key) {
+            $data = $data->where(function ($q) use ($search_columns, $key) {
 
-                /* Searching for the key in the column. */
-                $q->where('name', 'LIKE', '%'.$key.'%')
-                  ->orWhere('title', 'LIKE', '%'.$key.'%')
-                  ->orWhere('tags', 'LIKE', '%'.$key.'%');        
+                foreach ($search_columns as $column) {
+
+                    /* Searching for the key in the column. */
+                    $q->orWhere($column, 'LIKE', '%'.$key.'%');
+                }  
             });
+        }
+        
+        /* Filtering the seller by status. */
+        if (isset($request->status)) { 
+            $data = $data->whereStatus($request->status);
         }
 
         /* Filtering the data by date. */
-        if($request->from && $request->to){
+        if($request->from && $request->to) {
             
             $data = $data->whereBetween('created_at', [
                 Carbon::parse($request->from)->format('Y-m-d H:i:s'), 
@@ -115,14 +124,15 @@ class PostController extends Controller
         }
 
         $data = $data->orderBy($sort_column, $sort_order)->paginate($limit);
-
-        $status = 1;
+        
+        if($data) $status = 1;
 
         return response()->json([
             'data' => $data,
             'status' => $status
-         ]);
+        ]);
     }
+    
 
 
     public function delete(PostDeleteRequest $request) {

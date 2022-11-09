@@ -13,6 +13,7 @@ use App\Http\Requests\UserCreateRequest;
 use App\Http\Requests\UserReadRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Requests\UserDeleteRequest;
+use App\Http\Requests\UserLoginRequest;
 use App\Http\Requests\ListRequest;
 
 class UserController extends Controller
@@ -166,6 +167,21 @@ class UserController extends Controller
             'data' => $data,
             'status' => $status
         ]);
+    }
+
+
+    public function logout(){
+        
+        auth()->user()->tokens()->delete();
+
+       /* return a message that the user is logged out*/
+       return response()->json([
+        
+            'message' => 'user logged out',
+            'status' => 1
+        
+        ]);
+
     }
 
 

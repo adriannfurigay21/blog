@@ -50,5 +50,13 @@ class DatabaseSeeder extends Seeder
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
+
+        DB::table('admins')->insert([
+            'username'  => 'masteradmin',
+            'password'  => Hash::make('123456'),
+            'status'    => 'active',
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
     }
 }

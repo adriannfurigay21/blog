@@ -4,6 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use App\Models\Admin;
+
+use Illuminate\Support\Facades\Hash;
+
+use App\Http\Requests\AdminLoginRequest;
+
+
 class AdminController extends Controller
 {
     public function login(AdminLoginRequest $request)
@@ -55,7 +62,7 @@ class AdminController extends Controller
         } else {
             return response()->json(['status' => $status]);
         }
-        
+
         /* return a message that the admin is logged out*/
         return response()->json(['status' => $status]);
     }
