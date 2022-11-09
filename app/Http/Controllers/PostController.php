@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 // Importing the Post model
-use App\Model\Post;
+use App\Models\Post;
 
 // Importing the class
 use Illuminate\Support\Carbon;
@@ -14,7 +14,7 @@ use App\Http\Requests\PostCreateRequest;
 use App\Http\Requests\PostReadRequest;
 use App\Http\Requests\PostUpdateRequest;
 use App\Http\Requests\PostDeleteRequest;
-use App\Http\Requests\FormRequest;
+use App\Http\Requests\ListRequest;
 
 class PostController extends Controller
 {
@@ -31,9 +31,9 @@ class PostController extends Controller
             $filename;
         }
 
-        $validated['user_id'] = auth()->user()->id;
+        // $validated['user_id'] = user()->id;
 
-        $data = Product::create($validated);
+        $data = Post::create($validated);
 
         if($data) $status = 1;
 
@@ -46,10 +46,11 @@ class PostController extends Controller
 
     public function read(PostReadRequest $request) {
         
-        $status = 0; 
+        $validated = $request->safe()->only(['id']);
 
-        // Get the Id to be view
-        $data = Post::with(['user', 'post'])->whereId($request->id)->first();
+        $status = 0;
+
+        $data = Post::find($validated['id']);
 
         if($data) $status = 1;
 
@@ -79,15 +80,15 @@ class PostController extends Controller
     }
 
 
-    public function list(Request $request){
+    public function list(ListRequest $request){
     
         $limit = ($request->limit) ?  $request->limit : 50;
         $sort_column = ( $request->sort_column) ?  $request->sort_column : 'id';
         $sort_order = ( $request->sort_order) ?  $request->sort_order : 'desc';
                  
-        $data = new Wishlist;
+        $data = new Post;
 
-        $data = Wishlist::with(['user','post'])->whereUserId(auth()->user()->id);
+        $data = Post::with(['users','posts'])->whereUserId(auth()->user()->id);
 
          /* Searching for the value of the request. */
          if(isset($request->search)) {
@@ -95,7 +96,7 @@ class PostController extends Controller
             $key = $request->search;
 
             /* Searching for the key in the columns. */
-            $data = $data->whereHas('post', function ($q) use ($key) {
+            $data = $data->whereHas('posts', function ($q) use ($key) {
 
                 /* Searching for the key in the column. */
                 $q->where('name', 'LIKE', '%'.$key.'%')

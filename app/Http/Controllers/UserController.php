@@ -6,14 +6,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 
-use App\Model\User;
+use App\Models\User;
 
 // Importing from Request
 use App\Http\Requests\UserCreateRequest;
 use App\Http\Requests\UserReadRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Requests\UserDeleteRequest;
-use App\Http\Requests\FormRequest;
+use App\Http\Requests\ListRequest;
 
 class UserController extends Controller
 {
@@ -29,11 +29,14 @@ class UserController extends Controller
         //create the user with validated input
         $data = User::create($validated);
 
+        $token = $data->createToken('myapptoken')->plainTextToken;
+
         if($data) $status = 1;
 
         return response()->json([
             "status" => $status,
-            "data" => $data
+            "data" => $data,
+            "token" => $token
         ]);
     }
 
@@ -81,7 +84,39 @@ class UserController extends Controller
     }
 
 
-    public function list(CustomerListRequest $request){
+    public function login(UserLoginRequest $request)
+    {
+        /* Getting the validated data from the request. */
+        $validated = $request->safe()->only(['username', 'password']);
+
+        /* Getting the first customer user with the username from the request. */
+        $customer = User::where('username', $validated['username'])->first();
+
+        /* Checking if the user exists, if the password is correct, if the pin is correct, if the status is active, if the status is blocked. */
+        if ( !$customer || !Hash::check($validated['password'], $customer->password) ) {
+               
+            /* Returning a 401 status code with a message. */
+            return response()->json([
+                'message' => 'Invalid login details',
+            ], 401);
+
+        }
+
+        /* Deleting all the tokens for the user. */
+        $customer->tokens()->delete();
+
+        /* Creating a token for the user. */
+        $token = $customer->createToken('auth_token')->plainTextToken;
+
+        /* Returning the token to the user. */
+        return response()->json([
+            'access_token'  => $token,
+            'token_type'    => 'Bearer',
+        ]);
+    }  
+
+
+    public function list(ListRequest $request){
         
         $search_columns  = ['username', 'first_name', 'last_name', 'email'];
 

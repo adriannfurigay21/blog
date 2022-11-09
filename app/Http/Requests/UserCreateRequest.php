@@ -29,7 +29,7 @@ class UserCreateRequest extends FormRequest
             'username' => 'required|string|max:50|unique:users,username',
             'email' => 'required|string|max:50|unique:users,email',
             'password' => 'required|confirmed|min:8',
-            'type' => 'required|in:admin,user'
+            // 'type' => 'required|in:admin,user'
         ];
     }
 }

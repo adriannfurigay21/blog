@@ -26,7 +26,9 @@ class PostCreateRequest extends FormRequest
         return [
             'user_id' => 'required|integer|exists:users,id',
             'title' => 'required|string|max:50',
-            'body' => 'required|text',
+            'body' => 'required|string',
+            'summary' => 'required|string',
+            'tags' => 'required|string|max:50',
             'image' => 'required|file|mimetypes:image/jpeg, image/png, image/jpg'
         ];
     }
