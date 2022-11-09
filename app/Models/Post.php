@@ -14,6 +14,8 @@ class Post extends Model
         'user_id',
         'title',
         'body',
+        'summary',
+        'tags',
         'image'
     ];
 
