@@ -91,10 +91,10 @@ class UserController extends Controller
         $validated = $request->safe()->only(['username', 'password']);
 
         /* Getting the first customer user with the username from the request. */
-        $customer = User::where('username', $validated['username'])->first();
+        $user = User::where('username', $validated['username'])->first();
 
         /* Checking if the user exists, if the password is correct, if the pin is correct, if the status is active, if the status is blocked. */
-        if ( !$customer || !Hash::check($validated['password'], $customer->password) ) {
+        if ( !$user || !Hash::check($validated['password'], $user->password) ) {
                
             /* Returning a 401 status code with a message. */
             return response()->json([
@@ -104,10 +104,10 @@ class UserController extends Controller
         }
 
         /* Deleting all the tokens for the user. */
-        $customer->tokens()->delete();
+        $user->tokens()->delete();
 
         /* Creating a token for the user. */
-        $token = $customer->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         /* Returning the token to the user. */
         return response()->json([
