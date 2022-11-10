@@ -5,10 +5,18 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\Admin;
+use App\Models\Post;
+use App\Models\User;
 
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 use App\Http\Requests\AdminLoginRequest;
+use App\Http\Requests\UserDeleteRequest;
+use App\Http\Requests\UserReadRequest;
+use App\Http\Requests\PostDeleteRequest;
+use App\Http\Requests\PostReadRequest;
 
 
 class AdminController extends Controller
@@ -43,8 +51,67 @@ class AdminController extends Controller
     }
 
 
+    public function postRead(PostReadRequest $request) {
+        
+        $validated = $request->safe()->only(['id']);
 
-    public function logout(AdminLogoutRequest $request){
+        $status = 0;
+
+        $data = Post::find($validated['id']);
+
+        if($data) $status = 1;
+
+        return response()->json([
+            'data' => $data,
+            'status' => $status
+        ]);
+    }
+
+
+    public function postDelete(PostDeleteRequest $request) {
+        $data = DB::table('posts')->where('id', $request->id)->delete();
+
+        $status = 0;
+
+        if($data) $status = 1;
+
+        return response()->json([
+            'status' => $status
+        ]);
+    }
+
+
+    public function userRead(UserReadRequest $request) {
+        
+        $validated = $request->safe()->only(['id']);
+
+        $status = 0;
+
+        $data = User::find($validated['id']);
+
+        if($data) $status = 1;
+
+        return response()->json([
+            'data' => $data,
+            'status' => $status
+        ]);
+    }
+
+
+    public function userDelete(UserDeleteRequest $request) {
+        $data = DB::table('users')->where('id', $request->id)->delete();
+
+        $status = 0;
+
+        if($data) $status = 1;
+
+        return response()->json([
+            'status' => $status
+        ]);
+    }
+
+
+    public function logout(){
 
         /* Set status to 0*/
         $status = 0;
@@ -66,4 +133,24 @@ class AdminController extends Controller
         /* return a message that the admin is logged out*/
         return response()->json(['status' => $status]);
     }
+
 }
+
+
+
+
+    // public function logout(){
+        
+    //     auth()->user()->tokens()->delete();
+
+    //    /* return a message that the user is logged out*/
+    //    return response()->json([
+        
+    //         'message' => 'user logged out',
+    //         'status' => 1
+        
+    //     ]);
+
+    // }
+
+
